@@ -4,7 +4,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h> 
-#include "beaglebone_gpio.h"
 
 #define GPIO0_BASE 0x44E07000
 #define GPIO1_BASE 0x4804C000
