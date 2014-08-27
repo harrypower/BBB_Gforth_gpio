@@ -21,7 +21,7 @@
 \  This software is setup assuming the use of Debian Wheezy and may work on other versions.
 
 
-c-library mymmap
+c-library myBBBGPIO
 \c #include <stdio.h>
 \c #include <unistd.h>
 \c #include <sys/mman.h>

@@ -1,0 +1,11 @@
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.a
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.la
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.lai
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.o
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.so
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.so.0
+sudo rm /root/.gforth/libcc-named/.libs/myBBBGPIO.so.0.0.0
+sudo rm /root/.gforth/libcc-named/myBBBGPIO.c
+sudo rm /root/.gforth/libcc-named/myBBBGPIO.la
+sudo rm /root/.gforth/libcc-named/myBBBGPIO.lo
+sudo rm /root/.gforth/libcc-named/myBBBGPIO.o
