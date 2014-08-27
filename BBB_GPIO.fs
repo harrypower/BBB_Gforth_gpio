@@ -37,9 +37,12 @@ c-library myBBBGPIO
 \c #define GPIO_SIZE  0x00000FFF
 
 \c // OE: 0 is output, 1 is input
-\c #define GPIO_OE 0x14d
-\c #define GPIO_IN 0x14e
-\c #define GPIO_OUT 0x14f
+\c // #define GPIO_OE (0x134 / 4)
+\c #define GPIO_OE 0x4d
+\c // #define GPIO_IN (0x138 / 4)
+\c #define GPIO_IN 0x4e
+\c // #define GPIO_OUT (0x13c / 4)
+\c #define GPIO_OUT 0x4f
 
 \c #define GPIO1_28 (1<<28)
 
@@ -84,7 +87,7 @@ c-library myBBBGPIO
 \c for( i = 0; i < 100000 ; i++ ){
 \c     *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) | GPIO1_28;
 \c     usleep(1);
-\c     *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) * (~GPIO1_28);
+\c     *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) & (~GPIO1_28);
 \c     usleep(1); }
 
 \c return ( 0 ) ;
