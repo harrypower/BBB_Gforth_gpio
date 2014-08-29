@@ -1,0 +1,17 @@
+This is the Device tree generator page:
+http://kilobaser.com/blog/2014-07-28-beaglebone-black-devicetreeoverlay-generator#dtogenerator
+
+This page allows you to make device tree files and gives the information on how to compile and use device tree files.
+The file bspm_P9_42_f-00A0.dts is generated on that page.
+Do the following to compile it in /lib/firmware directory:
+dtc -O dtb -o /lib/firmware/bspm_P9_42_f-00A0.dtbo -b 0 -@ /lib/firmware/bspm_P9_42_f-00A0.dts
+
+Then install the device tree overlay as follows:
+echo bspm_P9_42_f > /sys/devices/bone_capemgr.9/slots
+echo 7 > /sys/class/gpio/export
+
+The files to acess the pin P9_42 is at this location:
+
+/sys/class/gpio/gpio7/  
+
+

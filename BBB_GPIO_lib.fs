@@ -39,12 +39,13 @@ c-library myBBBGPIO
 \c // OE: 0 is output, 1 is input
 \c // #define GPIO_OE (0x134 / 4)
 \c #define GPIO_OE 0x4d
-\c // #define GPIO_IN (0x138 / 4)
-\c #define GPIO_IN 0x4e
-\c // #define GPIO_OUT (0x13c / 4)
-\c #define GPIO_OUT 0x4f
+\c // #define GPIO_DATAIN (0x138 / 4)
+\c #define GPIO_DATAIN 0x4e
+\c // #define GPIO_DATAOUT (0x13c / 4)
+\c #define GPIO_DATAOUT 0x4f
 
 \c #define GPIO1_28 (1<<28)
+\c #define GPIO0_7  (1<<7)
 
 \c int mem_fd;
 \c char *gpio_mem, *gpio_map;
@@ -65,7 +66,7 @@ c-library myBBBGPIO
 
 \c /* mmap GPIO */
 \c gpio_map = (char *)mmap( 0, GPIO_SIZE, PROT_READ|PROT_WRITE,
-\c     MAP_SHARED, mem_fd, GPIO1_BASE );
+\c     MAP_SHARED, mem_fd, GPIO0_BASE );
 
 \c if (gpio_map == MAP_FAILED) {
 \c     printf("mmap error %d\n", (int)gpio_map);
@@ -78,21 +79,48 @@ c-library myBBBGPIO
 \c unsigned int creg = *(gpio + GPIO_OE);
 
 \c // set output
-\c creg = creg & (~GPIO1_28);
+\ \c creg = creg & (~GPIO1_28);
+\c creg = creg & (~GPIO0_7);
 \c *(gpio + GPIO_OE) = creg;
 
 \c int i;
 \c int test;
     
 \c for( i = 0; i < 100000 ; i++ ){
-\c     *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) | GPIO1_28;
+\ \c     *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) | GPIO1_28;
+\c     *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) | GPIO0_7;
 \c     usleep(1);
-\c     *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) & (~GPIO1_28);
+\ \c     *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) & (~GPIO1_28);
+\c     *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) & (~GPIO0_7);
 \c     usleep(1); }
 
 \c return ( 0 ) ;
 \c }
+\c 
+\c static int gpiosetup(void) { return 0; }
+\c int gpiocleanup(void) { return 0; }
+\ \c int gpiopullup(int gb, int gp) { return 0; }
+\ \c int gpiopulldown(int gb, int gp) { return 0; }
+\ \c int gpiopulloff(int gb, int gp) { return 0; }
+\c int gpioinput(int gb, int gp) { return 0; }
+\c int gpiooutput(int gb, int gp) { return 0; }
+\c static int gpioread(int *error, int gb, int gp) { return 0; }
+\c int gpioset(int gb, int gp) { return 0; }
+\c int gpioclear(int gb, int gp) { return 0; }
 
-c-function GPIO-setup io_setup  -- n 
+c-function GPIO-setup   io_setup          -- n 
+
+c-function bgiosetup    gpiosetup         -- n
+c-function bgiocleanup  gpiocleanup       -- n
+\ c-function bgiopullup   gpiopullup    n n -- n
+\ c-function bgiopulldown gpiopulldown  n n -- n
+\ c-function bgiopulloff  gpiopulloff   n n -- n
+c-function bgioinput    gpioinput     n n -- n
+c-function bgiooutput   gpiooutput    n n -- n
+c-function bgioread     gpioread    a n n -- n
+c-function bgioset      gpioset       n n -- n
+c-function bgioclear    gpioclear     n n -- n
+
+
 end-c-library
 
