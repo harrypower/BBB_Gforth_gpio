@@ -53,9 +53,10 @@ c-library myBBBGPIO
 \c // Enable all GPIO banks
 \c // Without this, access to deactivated banks (i.e. those with no clock source set up) will (logically) fail with SIGBUS
 \c // Idea taken from https://groups.google.com/forum/#!msg/beagleboard/OYFp4EXawiI/Mq6s3sg14HoJ
-\c system("echo 5 > /sys/class/gpio/export");
-\c system("echo 65 > /sys/class/gpio/export");
-\c system("echo 105 > /sys/class/gpio/export");
+\c // system("echo 5 > /sys/class/gpio/export");
+\c // system("echo 65 > /sys/class/gpio/export");
+\c // system("echo 105 > /sys/class/gpio/export");
+\c // The above does not seem to be needed
 
 \c /* open /dev/mem */
 \c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
@@ -82,8 +83,6 @@ c-library myBBBGPIO
 \c *(gpio + GPIO_OE) = creg;
 
 \c int i;
-\c int test;
-    
 \c for( i = 0; i < 10000 ; i++ ){
 \c     *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) | GPIO1_28;
 \ \c     *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) | GPIO0_7;
@@ -97,9 +96,44 @@ c-library myBBBGPIO
 
 \c void testoff(void) { *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) & ~0x10000000; }
 
-\c int clock(void) { return ( (int) *(gpio + (0x130 / 4))); }
+\c // *************************************
+\c void nexttest(void) {
+\c volatile void *gpio_addr = NULL;
+\c volatile unsigned int *gpio_oe_addr = NULL;
+\c volatile unsigned int *gpio_setdataout_addr = NULL;
+\c volatile unsigned int *gpio_cleardataout_addr = NULL;
+\c unsigned int reg;
 
-\c 
+\c /* open /dev/mem */
+\c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
+\c     printf("can't open /dev/mem \n");
+\c     exit (-1); }
+
+\c /* mmap GPIO */
+\c gpio_addr = mmap(0, GPIO_SIZE, PROT_READ | PROT_WRITE,MAP_SHARED, mem_fd, GPIO1_BASE);
+
+\c gpio_oe_addr = gpio_addr + 0x134;
+\c gpio_setdataout_addr = gpio_addr + 0x194;
+\c gpio_cleardataout_addr = gpio_addr + 0x190;
+
+\c if(gpio_addr == MAP_FAILED) {
+\c printf("Unable to map GPIO\n");
+\c exit(1); }
+
+\c reg = *gpio_oe_addr;
+\c reg = reg & (~0x10000000);
+\c *gpio_oe_addr = reg;
+
+\c int i;
+\c for( i = 0; i < 10000 ; i++) {
+\c *gpio_setdataout_addr = *gpio_setdataout_addr | 0x10000000;
+\c *gpio_cleardataout_addr = *gpio_cleardataout_addr & ~0x1000000;
+\c }
+
+\c close(mem_fd); }
+\c // ****************************
+
+
 \c int gpiosetup(int gb) { return 0; }
 \c int gpiocleanup(void) { return 0; }
 \c int gpioinput(int gb, int gp) { return 0; }
@@ -108,10 +142,10 @@ c-library myBBBGPIO
 \c int gpioset(int gb, int gp) { return 0; }
 \c int gpioclear(int gb, int gp) { return 0; }
 
-c-function clockdata    clock             -- n
 c-function teston       teston            -- void 
 c-function testoff      testoff           -- void
 c-function GPIO-setup   io_setup          -- void 
+c-function nexttest     nexttest          -- void
 
 c-function bgiosetup    gpiosetup       n -- n
 c-function bgiocleanup  gpiocleanup       -- n
