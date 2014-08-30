@@ -35,9 +35,9 @@ static void io_setup(void)
   // Enable all GPIO banks
   // Without this, access to deactivated banks (i.e. those with no clock source set up) will (logically) fail with SIGBUS
   // Idea taken from https://groups.google.com/forum/#!msg/beagleboard/OYFp4EXawiI/Mq6s3sg14HoJ
-  system("echo 5 > /sys/class/gpio/export");
-  system("echo 65 > /sys/class/gpio/export");
-  system("echo 105 > /sys/class/gpio/export");
+  //system("echo 5 > /sys/class/gpio/export");
+  //system("echo 65 > /sys/class/gpio/export");
+  //system("echo 105 > /sys/class/gpio/export");
 
   /* open /dev/mem */
   if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
@@ -67,10 +67,10 @@ static void io_setup(void)
   unsigned int creg = *(gpio + GPIO_OE);
 
   // Set outputs
-  creg = creg & (~USR0_LED);
-  creg = creg & (~USR1_LED);
-  creg = creg & (~USR2_LED);
-  creg = creg & (~USR3_LED);
+  // creg = creg & (~USR0_LED);
+  //creg = creg & (~USR1_LED);
+  //creg = creg & (~USR2_LED);
+  //creg = creg & (~USR3_LED);
   creg = creg & (~GPIO1_28);
   // Set new direction control register contents
   *(gpio + GPIO_OE) = creg;
@@ -79,9 +79,8 @@ static void io_setup(void)
 int main(int argc, char **argv)
 {
   int i;
-  int test;
   io_setup();
-  while (1) {
+  for( i = 0; i < 10000;i++) {
     // Set LEDs
     //*(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) | USR0_LED;
     //    *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) | USR1_LED;
@@ -90,8 +89,6 @@ int main(int argc, char **argv)
     *(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) | GPIO1_28;
     // sleep(1);
     // usleep(1);
-    for( i = 0; i < 4; i++)
-      { test = i; }
     // Clear LEDs
     //*(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) & (~USR0_LED);
     //*(gpio + GPIO_OUT) = *(gpio + GPIO_OUT) & (~USR1_LED);
