@@ -115,7 +115,7 @@ c-library myBBBGPIO
 \c char *gpio_mem, *gpio_map;
 \c volatile unsigned *gpio;
 
-\c static void io_setup(void){
+\c void iosetup(void){
 \c /* open /dev/mem */
 \c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
 \c     printf("can't open /dev/mem \n");
