@@ -33,7 +33,9 @@ bbbioinput  <br>
 bbbioread .  \ this would produce 0 or 268435456 ( this is decimal for 0x10000000)
 
 So you can see how easy it is to do things to the pin.  After you should close the pin down as follows:
+
 bbbiocleanup
+
 Now what ever settings were in the GPIO_DATAOUT and GPIO_OE registers at the start of this code should 
 now be restored!
 This method of setting bank and gpio pin number allows more then one pin from a bank to be played with at
