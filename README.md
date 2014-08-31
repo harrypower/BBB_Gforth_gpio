@@ -26,10 +26,10 @@ GPIO_28 GPIO bank 1.  So the setup to use this pin in my code would be as follow
 
 This now lets you use the other words to read that pin or write data to the pin as follows:
 
-bbbiooutput<br> 
-bbbioset
-bbbioclear
-bbbioinput 
+bbbiooutput <br> 
+bbbioset    <br>
+bbbioclear  <br>
+bbbioinput  <br>
 bbbioread .  \ this would produce 0 or 268435456 ( this is decimal for 0x10000000)
 
 So you can see how easy it is to do things to the pin.  After you should close the pin down as follows:
