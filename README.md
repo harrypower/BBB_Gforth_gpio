@@ -4,8 +4,8 @@ BBB_Gforth_gpio
 GPIO access using mmap in Gforth for Beagle Bone Black Rev C
 
 This code is a gforth gpio solution.  It will use c code writen in the gforth file 
-as a shared library that will access gpio via mmap funciton in c.  The GPIO library functions  
-will allow setup and access to any gpio pin but note these pins are not all brought out to P8 and P9 header
+as a shared library that will access gpio via mmap funciton in c.  The GPIO library functions will 
+allow setup and access to any gpio pin but note these pins are not all brought out to P8 and P9 header
 and most pins are used by other thing on the Beagle Bone Black.  The device tree stuff will need to be 
 externaly handled and a good way to do this is to use bonescript pinMode function as you can setup pullup 
 and slew rate settings. Note the gpio code will still work on pins that do not conflict with hardware or 
