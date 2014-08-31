@@ -160,12 +160,26 @@ c-function bbbioset      gpioset           -- void
 c-function bbbioclear    gpioclear         -- void
 
 end-c-library
+\ NOTE: Do not connect 5V logic level signals to these pins or the board will be damaged.
+\ NOTE: DO NOT APPLY VOLTAGE TO ANY I/O PIN WHEN POWER IS NOT SUPPLIED TO THE BOARD.
+\ IT WILL DAMAGE THE PROCESSOR AND VOID THE WARRANTY.
+\ NO PINS ARE TO BE DRIVEN UNTIL AFTER THE SYS_RESET LINE GOES HIGH
+
+\ These gforth words have the ability to damage your Beagle Bone Black.
+\ With great power comes great responsibility!  Understand the above warnings from 
+\ the Beagle Bone Black reference materials!
+\ Please ensure you understand how to use this code before hooking anything up 
+\ to your BBB.  I have been able to toggle pins on and off at 500 khz with this code.
+\ I have not needed faster then this speed.  It is possible with extending this 
+\ code with a toggling function. Testing with this idea i was able to reach around 
+\ 1 mhz. 
 
 \ bbbiosetup ( nbank ngpiobits -- nflag )
 \ This will set up the ability to access gpio nbank and ngpiobits 
 \ nbank is 0,1,2,3 any other number returns nflag of true (-1)
 \ ngpiobits is a 32 bit number one bit per gpio bit 
 \ nflag is 0 for gpio operations all good any other value is an error
+\ ngpiobits allows many bits to be turned on at once or use it for just one bit.
 \ This code does not switch any modes or do any operations on registers 
 \ but now other functions can be used to access the gpio functions.
 \ Note this is bank and gpiobits are not Beagle Bone Black P8 or P9 pins 
@@ -175,7 +189,7 @@ end-c-library
 \ bbbiocleanup ( -- nflag )
 \ This will release the mmap memory that is accessed in bbbiosetup and restore 
 \ the values in GPIO_OE and GPIO_DATAOUT registers at bbbiosetup entry values
-\ thus restoring the output settings and the current output levels.
+\ thus restoring the output settings and the original output levels.
 \ Note if bbbiosetup was not called before this function then nflag is true (-1)
 \ and nothing happens to chip registers at all.
 \ This word should be used after you are done with gpio stuff!
@@ -224,5 +238,33 @@ end-c-library
 \ Note if you have not used bbbiosetup before this word nothing will happen to the 
 \ registers.
 
-\ 
+\ example #1
+\ 1 constant bank1
+\ 0x10000000 constant gpio28
+\ bank1 gpio28 bbbiosetup throw  
+\ bbbiooutput
+\ bbbioclear
+\ bbbioset
+\ bbbioclear 
+\ bbbiocleanup 
 
+\ The above example will put one pulse of low to high to low out on P9_12 header pin
+
+\ example #2
+\ : starttoggle ( -- ) 1 0x10000000 bbbiosetup throw bbbiooutput bbbioclear ;
+\ : toggle ( -- ) bbbioset bbbioclear ;
+\ : ntoggle ( n -- ) 0 ?do toggle loop ;
+\ : finishtoggle ( -- )  bbbiocleanup throw ;
+\ starttoggle 10 ntoggle finishtoggle 
+
+\ This example will make a pulse train of 10 low to high pulse at P9_12 header pin 
+
+\ example #3
+\ 1 constant bank1
+\ 0x10000000 constant gpio28
+\ bank1 gpio28 bbbiosetup throw
+\ bbbioinput
+\ bbbioread gpio28 = [if] ." P9_12 is High" [else] ." P9_12 is Low" [then] cr 
+\ bbbiocleanup throw
+
+\ This example will read P9_12 header pin 
