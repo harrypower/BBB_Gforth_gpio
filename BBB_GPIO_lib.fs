@@ -47,8 +47,10 @@ c-library myBBBGPIO
 \c unsigned int areg = 0;
 \c char *gpio_map;
 \c volatile unsigned *gpio;
+\c int pins;
 
-\c int gpiosetup(int gpio_bank){
+\c int gpiosetup(int gpio_bank, int gpio_pins ){
+\c pins = gpio_pins ;
 \c /* open /dev/mem */
 \c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
 \c     printf("can't open /dev/mem \n");
@@ -83,37 +85,35 @@ c-library myBBBGPIO
 \c mem_fd = 0;
 \c gpio_map = 0;
 \c areg = 0;
-\c gpio = 0; }
+\c gpio = 0;
+\c pins = 0; }
 
-\c int gpioinput(int gpio_pins) {
+\c void gpioinput(void) {
 \c areg = *(gpio + GPIO_OE);
-\c areg = areg | gpio_pins;
-\c *(gpio + GPIO_OE) = areg;
-\c return 0; }
+\c areg = areg | pins;
+\c *(gpio + GPIO_OE) = areg; }
 
-\c int gpiooutput(int gpio_pins) {
+\c void gpiooutput(void) {
 \c areg = *(gpio + GPIO_OE);
-\c areg = areg & (~gpio_pins);
-\c *(gpio + GPIO_OE) = areg;
-\c return 0 ; }
+\c areg = areg & (~pins);
+\c *(gpio + GPIO_OE) = areg; }
+
 
 \c int gpioread(int *error, int gpio_pins) { return 0; }
 
-\c void  gpioset(int gpio_pins) {
-\c *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) | gpio_pins; }
-\ \c return 0; }
+\c void  gpioset(void) {
+\c *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) | pins; }
 
-\c void gpioclear(int gpio_pins) {
-\c *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) & (~gpio_pins); }
-\ \c return 0; }
+\c void gpioclear(void) {
+\c *(gpio + GPIO_DATAOUT) = *(gpio + GPIO_DATAOUT) & (~pins); }
 
-c-function bbbiosetup    gpiosetup       n -- n
+c-function bbbiosetup    gpiosetup     n n -- n
 c-function bbbiocleanup  gpiocleanup       -- void
-c-function bbbioinput    gpioinput       n -- n
-c-function bbbiooutput   gpiooutput      n -- n
+c-function bbbioinput    gpioinput         -- void
+c-function bbbiooutput   gpiooutput        -- void
 c-function bbbioread     gpioread     a  n -- n
-c-function bbbioset      gpioset         n -- void
-c-function bbbioclear    gpioclear       n -- void
+c-function bbbioset      gpioset           -- void
+c-function bbbioclear    gpioclear         -- void
 
 end-c-library
 
