@@ -21,13 +21,17 @@ these gpios are not all brought out to P8 and P9 headers and some are connected 
 This means you need to look at the Beagle Bone Black schematics to figure out what P9 or P8 pins connect to 
 in order to use the gforth words to connect to the real world pins.  An example of this is P9_12 pin is
 GPIO_28 GPIO bank 1.  So the setup to use this pin in my code would be as follows:
+
 1 0x10000000 bbbiosetup 
+
 This now lets you use the other words to read that pin or write data to the pin as follows:
-bbbiooutput 
+
+bbbiooutput<br> 
 bbbioset
 bbbioclear
 bbbioinput 
 bbbioread .  \ this would produce 0 or 268435456 ( this is decimal for 0x10000000)
+
 So you can see how easy it is to do things to the pin.  After you should close the pin down as follows:
 bbbiocleanup
 Now what ever settings were in the GPIO_DATAOUT and GPIO_OE registers at the start of this code should 
