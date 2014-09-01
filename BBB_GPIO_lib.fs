@@ -45,14 +45,14 @@ c-library myBBBGPIO
 \c #define IOGOOD            0xf
 \c #define IOBAD             -1
 
-\c static int mem_fd = 0;
-\c unsigned int areg = 0;
-\c char *gpio_map;
+\c volatile int mem_fd = 0;
+\c volatile unsigned int areg = 0;
+\c volatile char *gpio_map;
 \c volatile unsigned *gpio;
-\c int bits;
-\c unsigned int out_en = 0;
-\c unsigned int data_out = 0;
-\c int gpio_setup = 0;
+\c volatile int bits;
+\c volatile unsigned int out_en = 0;
+\c volatile unsigned int data_out = 0;
+\c volatile int gpio_setup = 0;
 
 \c int gpiosetup(int gpio_bank, int gpio_bits ){
 \c unsigned int bank = 0;
