@@ -42,7 +42,7 @@ c-library myBBBGPIO
 \c #define GPIO_DATAOUT      (0x13c /4)
 \c #define GPIO_CLEARDATAOUT (0x190 /4)
 \c #define GPIO_SETDATAOUT   (0x194 /4)
-\c #define IOGOOD            0xf
+\c #define IOGOOD            0 
 \c #define IOBAD             -1
 
 \c volatile int mem_fd = 0;
@@ -52,10 +52,11 @@ c-library myBBBGPIO
 \c volatile int bits;
 \c volatile unsigned int out_en = 0;
 \c volatile unsigned int data_out = 0;
-\c volatile int gpio_setup = 0;
+\c volatile int gpio_setup = IOBAD;
 
 \c int gpiosetup(int gpio_bank, int gpio_bits ){
 \c unsigned int bank = 0;
+\c gpio_setup = IOBAD;
 \c switch(gpio_bank){
 \c case 0 :
 \c     bank = GPIO0_BASE;
@@ -70,12 +71,12 @@ c-library myBBBGPIO
 \c     bank = GPIO3_BASE;
 \c     break;
 \c default :
-\c     return(IOBAD); }
+\c     return(gpio_setup); }
     
 \c /* open /dev/mem */
 \c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
 \c     printf("can't open /dev/mem \n");
-\c     return(IOBAD); }
+\c     return(gpio_setup); }
 
 \c /* mmap GPIO */
 \c gpio_map = (char *)mmap( 0, GPIO_SIZE, PROT_READ|PROT_WRITE,
@@ -84,7 +85,7 @@ c-library myBBBGPIO
 \c /* mmap fail test */    
 \c if (gpio_map == MAP_FAILED) {
 \c     printf("mmap error %d\n", (int)gpio_map);
-\c     return(IOBAD); }
+\c     return(gpio_setup); }
 
 \c bits = gpio_bits ;
     
@@ -98,10 +99,10 @@ c-library myBBBGPIO
 \c data_out = *(gpio + GPIO_DATAOUT);
     
 \c gpio_setup = IOGOOD;
-\c return 0 ;}
+\c return (gpio_setup) ;}
 
 \c int gpiocleanup(void) {
-\c int errors = 0;
+\c int errors = gpio_setup;
 \c if(gpio_setup == IOGOOD){
 \c *(gpio + GPIO_OE) = out_en; // restore GPIO_OE
 \c *(gpio + GPIO_DATAOUT) = data_out; // restore GPIO_DATAOUT
@@ -113,7 +114,7 @@ c-library myBBBGPIO
 \c bits = 0;
 \c out_en = 0;
 \c data_out = 0;
-\c gpio_setup = 0;
+\c gpio_setup = IOBAD;
 \c } else {
 \c errors = IOBAD;
 \c }
@@ -131,11 +132,12 @@ c-library myBBBGPIO
 \c areg = areg & (~bits);
 \c *(gpio + GPIO_OE) = areg; } }
 
-\c int gpioread(void) {
+\c int gpioread(unsigned *values) {
 \c if(gpio_setup == IOGOOD){
-\c return (*(gpio + GPIO_DATAIN) & bits);
+\c *values = (*(gpio + GPIO_DATAIN) & bits); 
+\c return (IOGOOD);
 \c } else {
-\c return (0); } }
+\c return (IOBAD); } }
 
 \c void  gpioset(void) {
 \c if(gpio_setup == IOGOOD){
@@ -155,7 +157,7 @@ c-function bbbiosetup    gpiosetup     n n -- n
 c-function bbbiocleanup  gpiocleanup       -- n
 c-function bbbioinput    gpioinput         -- void
 c-function bbbiooutput   gpiooutput        -- void
-c-function bbbioread     gpioread          -- n
+c-function bbbioread     gpioread        a -- n
 c-function bbbioset      gpioset           -- void
 c-function bbbioclear    gpioclear         -- void
 
@@ -262,9 +264,10 @@ end-c-library
 \ example #3
 \ 1 constant bank1
 \ 0x10000000 constant gpio28
+\ variable pinvalue
 \ bank1 gpio28 bbbiosetup throw
 \ bbbioinput
-\ bbbioread gpio28 = [if] ." P9_12 is High" [else] ." P9_12 is Low" [then] cr 
+\ pinvalue bbbioread throw pinvalue @ gpio28 = cr ." P9_12 " [if] ." is High" [else] ." is Low" [then] 
 \ bbbiocleanup throw
 
 \ This example will read P9_12 header pin 
