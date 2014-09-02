@@ -86,8 +86,12 @@ variable junk$
 variable dth_self$
 variable header_pin$
 variable gpio_pin_data
+variable cmdlineadd
+variable cmdlinerm
 
 s" dth_11_22_bbb.fs" dth_self$ $!
+s" ; echo ' ****'" cmdlineadd $!
+s\" \n ****\n" cmdlinerm $!
 
 : dth_var_reset ( -- )
     0 to dth_timings_index
@@ -242,10 +246,21 @@ s" dth_11_22_bbb.fs" dth_self$ $!
 : dth_busy? ( -- nflag ) \ false means dth_11_22_BBB.fs is running only once this is the only process
     \ true means dth_11_22_BBB.fs is running more then once
     try                  \ or there is some system error not allowing detection of processes running!
-	s" pgrep -c -f " junk$ $! dth_self$ $@ junk$ $+! junk$ $@ r/o open-pipe throw { mypipe }
-	pad 80 mypipe read-file throw pad swap s>number?
-	if 2drop true else d>s 1 <= if false else true then then
-    restore
+	s" pgrep -c -f " junk$ $! dth_self$ $@ junk$ $+!
+	cmdlineadd $@ junk$ $+! junk$ $@  \ add this to cli to ensure a return of something
+	r/o open-pipe throw { mypipe }
+	pad 80 mypipe read-file throw
+	mypipe close-pipe throw drop 
+	pad swap 
+ 	cmdlinerm $@len -  \ this removes the added cli string that should always be there
+	s>number?
+	if
+	    d>s 1 <=  \ ensure only one process is running... this process
+	    if false else true then
+	else
+	    2drop true
+	then
+    restore 
     endtry ;
 
 : get_temp_humd ( -- )
