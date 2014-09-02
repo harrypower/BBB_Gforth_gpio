@@ -87,7 +87,6 @@ variable dth_self$
 variable header_pin$
 variable gpio_pin_data
 
-junk$ $init
 s" dth_11_22_bbb.fs" dth_self$ $!
 
 : dth_var_reset ( -- )
@@ -278,7 +277,7 @@ s" dth_11_22_bbb.fs" dth_self$ $!
 : get_pin ( addr u -- nflag ) \ nflag is false for pin not allowed or present in command line switch
     '_' $split  \ at this time only P9_12 is possible to use
     2swap 2drop
-    "P9_12" search if header_pin$ $! 1 to gpio_bank 0x10000000 to gpio_dth_pin true else header_pin$ $! false  then ;
+   s" P9_12" search if header_pin$ $! 1 to gpio_bank 0x10000000 to gpio_dth_pin true else header_pin$ $! false  then ;
 
 : config-dth-type
     next-arg dup 0=
