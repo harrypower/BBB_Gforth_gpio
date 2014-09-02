@@ -69,7 +69,7 @@ max_transitions 1 - constant max_timings
 18 constant dth_start_time
 
 1 value  gpio_bank
-12 value gpio_dth_pin
+0x10000000 value gpio_dth_pin
 0 value dth_data_location
 0 value dth_data_transitions
 0 value dth_data_timings
@@ -85,6 +85,7 @@ max_transitions 1 - constant max_timings
 variable junk$
 variable dth_self$
 variable header_pin$
+variable gpio_pin_data
 
 junk$ $init
 s" dth_11_22_bbb.fs" dth_self$ $!
@@ -114,16 +115,25 @@ s" dth_11_22_bbb.fs" dth_self$ $!
 	dth_data_bits 40 0 fill
     then  ;
 
+\ ************ this word needs to be rewriten for bbb ***********
 : dth_start_signal ( -- ) \ will put dth sensor in sampling mode
-    piosetup throw gpio_dth_pin pipinsetpulldisable throw gpio_dth_pin pipinhigh throw
-    gpio_dth_pin pipinoutput throw gpio_dth_pin pipinhigh throw gpio_dth_pin pipinlow throw
-    dth_start_time ms gpio_dth_pin pipinhigh throw gpio_dth_pin pipininput throw  ;
+    gpio_bank gpio_dth_pin bbbiosetup throw
+    bbbioset bbbiooutput bbbioset
+    bbbioclear dth_start_time ms bbbioset bbbioinput ;
+    
+\    piosetup throw gpio_dth_pin pipinsetpulldisable throw gpio_dth_pin pipinhigh throw
+\    gpio_dth_pin pipinoutput throw gpio_dth_pin pipinhigh throw gpio_dth_pin pipinlow throw
+\    dth_start_time ms gpio_dth_pin pipinhigh throw gpio_dth_pin pipininput throw  ;
 
+\ **************** rewrite word for BBB
 : dth_shutdown ( -- ) \ clean up gpio mode
-    piocleanup throw ;
+    bbbiocleanup throw ;
 
+\ ************** rewrite word for BBB
 : dth_read ( -- nvalue )
-    gpio_dth_pin pad pipinread throw pad c@ ;
+    gpio_pin_data bbbioread throw
+    gpio_pin_data @ gpio_dth_pin =
+    if 1 else 0 then ;
 
 : dth_get_data ( -- )
     dth_var_reset dth_data_storage_setup
@@ -268,7 +278,7 @@ s" dth_11_22_bbb.fs" dth_self$ $!
 : get_pin ( addr u -- nflag ) \ nflag is false for pin not allowed or present in command line switch
     '_' $split  \ at this time only P9_12 is possible to use
     2swap 2drop
-    "P9_12" search if header_pin$ $! 1 to gpio_bank 28 to gpio_dth_pin true else header_pin$ $! false  then ;
+    "P9_12" search if header_pin$ $! 1 to gpio_bank 0x10000000 to gpio_dth_pin true else header_pin$ $! false  then ;
 
 : config-dth-type
     next-arg dup 0=
