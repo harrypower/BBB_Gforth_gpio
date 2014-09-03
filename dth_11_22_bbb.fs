@@ -118,29 +118,22 @@ s\" \n ****\n" cmdlinerm $!
 	dth_data_bits 40 0 fill
     then  ;
 
-\ ************ this word needs to be rewriten for bbb ***********
 : dth_start_signal ( -- ) \ will put dth sensor in sampling mode
     gpio_bank gpio_dth_pin bbbiosetup throw
     bbbioset bbbiooutput bbbioset
     bbbioclear dth_start_time ms bbbioset bbbioinput ;
     
-\    piosetup throw gpio_dth_pin pipinsetpulldisable throw gpio_dth_pin pipinhigh throw
-\    gpio_dth_pin pipinoutput throw gpio_dth_pin pipinhigh throw gpio_dth_pin pipinlow throw
-\    dth_start_time ms gpio_dth_pin pipinhigh throw gpio_dth_pin pipininput throw  ;
-
-\ **************** rewrite word for BBB
 : dth_shutdown ( -- ) \ clean up gpio mode
     bbbiocleanup throw ;
 
-\ ************** rewrite word for BBB
 : dth_read ( -- nvalue )
     gpio_pin_data bbbioread throw
-    gpio_pin_data @ gpio_dth_pin =
-    if 1 else 0 then ;
+    gpio_pin_data @ \ if this is zero then that is considered false so return zero 
+    if 1 else 0 then ; \ if it is not zero then it is true and return 1
 
 : dth_get_data ( -- )
-    dth_var_reset dth_data_storage_setup
-    max_data_quantity 0 dth_start_signal ?do dth_read dth_data_location i + c! loop dth_shutdown ;
+    dth_data_storage_setup dth_var_reset
+    max_data_quantity 0 dth_start_signal do dth_read dth_data_location i + c! loop dth_shutdown ;
 
 : dth_data@ ( nindex -- nvalue ) \ retreaves unprocesed raw dth stored readings
     dth_data_location + c@ ;
@@ -177,14 +170,14 @@ s\" \n ****\n" cmdlinerm $!
 
 : find_start_bit ( -- )
     max_timings 0 ?do i timings@ 0 < if i 1 - timings@ to start_bit_value i 2 - to bit_40_location leave then loop
-    bit_40_location 79 <= if bit_40_not_found_fail throw then ;
+    bit_40_location 78 < if bit_40_not_found_fail throw then ;
 
 : dth_bits! ( cvalue nindex -- ) dth_data_bits + c! ;
 
 : dth_bits@ ( nindex -- cvalue ) dth_data_bits + c@ ;
 
 : dth_bits ( -- )
-    bit_40_location  bit_40_location 80 -
+    bit_40_location bit_40_location 80 - 
     ?do
 	i timings@ start_bit_value >
 	if 1 else 0 then dth_data_bits_index dup 1 + to dth_data_bits_index dth_bits!
@@ -229,7 +222,8 @@ s\" \n ****\n" cmdlinerm $!
     2 transitions@ 100 > if no_header_fail throw then ;
 
 : testit ( -- ) \ testing word to show data from dth device
-    dth_get_data max_data_quantity seedata
+    \ dth_get_data
+    max_data_quantity seedata
     transitions  max_transitions seetransitions
     timings max_timings seetimings
     find_start_bit
@@ -255,7 +249,8 @@ s\" \n ****\n" cmdlinerm $!
 	cmdlinerm $@len -  \ this removes the added cli string that should always be there
 	s>number?
 	if
-	    d>s 5 <=  \ ensure only one process is running... this process
+	    d>s 8 <=  \ ensure only one process is running... this process
+	    \ 5
 	    if false else true then
 	else
 	    2drop true
