@@ -63,7 +63,7 @@ include string.fs
 1004 constant 10_trys_fail
 1005 constant no_header_fail
 
-1500 constant max_data_quantity
+2000 constant max_data_quantity
 100 constant max_transitions
 max_transitions 1 - constant max_timings
 18 constant dth_start_time
@@ -177,14 +177,14 @@ s\" \n ****\n" cmdlinerm $!
 
 : find_start_bit ( -- )
     max_timings 0 ?do i timings@ 0 < if i 1 - timings@ to start_bit_value i 2 - to bit_40_location leave then loop
-    bit_40_location 0 = if bit_40_not_found_fail throw then ;
+    bit_40_location 79 <= if bit_40_not_found_fail throw then ;
 
 : dth_bits! ( cvalue nindex -- ) dth_data_bits + c! ;
 
 : dth_bits@ ( nindex -- cvalue ) dth_data_bits + c@ ;
 
 : dth_bits ( -- )
-    bit_40_location 2 + bit_40_location 78 -
+    bit_40_location  bit_40_location 80 -
     ?do
 	i timings@ start_bit_value >
 	if 1 else 0 then dth_data_bits_index dup 1 + to dth_data_bits_index dth_bits!
@@ -251,11 +251,11 @@ s\" \n ****\n" cmdlinerm $!
 	r/o open-pipe throw { mypipe }
 	pad 80 mypipe read-file throw
 	mypipe close-pipe throw drop 
-	pad swap 
- 	cmdlinerm $@len -  \ this removes the added cli string that should always be there
+	pad swap 2dup dump cr
+	cmdlinerm $@len -  \ this removes the added cli string that should always be there
 	s>number?
 	if
-	    d>s 1 <=  \ ensure only one process is running... this process
+	    d>s 5 <=  \ ensure only one process is running... this process
 	    if false else true then
 	else
 	    2drop true
@@ -323,4 +323,4 @@ s\" \n ****\n" cmdlinerm $!
     ." Replace H with 8 or 9 and XX with a number for header pin. Not all pins can be used with this sensors. Use Header ground and header 3.3 volts supply only for DTH sensor." cr
     2drop bye ;
 
-\  config-dth-type
+\ config-dth-type
