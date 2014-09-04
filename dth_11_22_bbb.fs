@@ -57,16 +57,18 @@ include BBB_GPIO_lib.fs
 include string.fs
 
 1000 constant many_transitions_fail
-1001 constant bit_40_not_found_fail
+1001 constant bit_39_not_found_fail
 1002 constant checksum_fail
 1003 constant dth_busy_fail
-1004 constant 10_trys_fail
+1004 constant 50_trys_fail
 1005 constant no_header_fail
+1006 constant bit_0_not_found_fail
 
-2000 constant max_data_quantity
+3000 constant max_data_quantity
 100 constant max_transitions
 max_transitions 1 - constant max_timings
 18 constant dth_start_time
+150 constant header_values
 
 1 value  gpio_bank
 0x10000000 value gpio_dth_pin
@@ -78,14 +80,13 @@ max_transitions 1 - constant max_timings
 0 value dth_timings_index
 0 value dth_data_bits_index
 11 value dth-11-22?
-20 value retry-times
+50 value retry-times
 0 value start_bit_value
-0 value bit_40_location
+0 value bit_39_location
 
 variable junk$
 variable dth_self$
 variable header_pin$
-variable gpio_pin_data
 variable cmdlineadd
 variable cmdlinerm
 
@@ -97,13 +98,13 @@ s\" \n ****\n" cmdlinerm $!
     0 to dth_timings_index
     0 to dth_transitions_size
     0 to start_bit_value
-    0 to bit_40_location
+    0 to bit_39_location
     0 to dth_data_bits_index
     dth_data_location 0<>
     if
 	dth_data_transitions max_transitions cell * 0 fill
 	dth_data_timings max_timings cell * 0 fill
-	dth_data_bits 40 0 fill
+	dth_data_bits 45 0 fill
     then ;
 
 : dth_data_storage_setup ( -- ) \ gets the memory for storage of dth reading procedure
@@ -114,9 +115,15 @@ s\" \n ****\n" cmdlinerm $!
 	dth_data_transitions max_transitions cell * 0 fill
 	max_timings cell * allocate throw to dth_data_timings
 	dth_data_timings max_timings cell * 0 fill
-	40 allocate throw to dth_data_bits
-	dth_data_bits 40 0 fill
+	45 allocate throw to dth_data_bits
+	dth_data_bits 45 0 fill
     then  ;
+
+: dth_data_cleanup ( -- ) \ free all memory alocations
+    dth_data_location free throw
+    dth_data_transitions free throw
+    dth_data_timings free throw
+    dth_data_bits free throw ;
 
 : dth_start_signal ( -- ) \ will put dth sensor in sampling mode
     gpio_bank gpio_dth_pin bbbiosetup throw
@@ -127,9 +134,7 @@ s\" \n ****\n" cmdlinerm $!
     bbbiocleanup throw ;
 
 : dth_read ( -- nvalue )
-    gpio_pin_data bbbioread throw
-    gpio_pin_data @ \ if this is zero then that is considered false so return zero 
-    if 1 else 0 then ; \ if it is not zero then it is true and return 1
+    bbbioreadf if 1 else 0 then ;
 
 : dth_get_data ( -- )
     dth_data_storage_setup dth_var_reset
@@ -169,18 +174,18 @@ s\" \n ****\n" cmdlinerm $!
     cr 0 ?do i timings@ . s"  " type loop ;
 
 : find_start_bit ( -- )
-    max_timings 0 ?do i timings@ 0 < if i 1 - timings@ to start_bit_value i 2 - to bit_40_location leave then loop
-    bit_40_location 78 < if bit_40_not_found_fail throw then ;
+    max_timings 0 ?do i timings@ 0 < if i 1 - timings@ to start_bit_value i 2 - to bit_39_location leave then loop
+    bit_39_location 79 < if bit_39_not_found_fail throw then ;
 
 : dth_bits! ( cvalue nindex -- ) dth_data_bits + c! ;
 
 : dth_bits@ ( nindex -- cvalue ) dth_data_bits + c@ ;
 
 : dth_bits ( -- )
-    bit_40_location bit_40_location 80 - 
-    ?do
-	i timings@ start_bit_value >
-	if 1 else 0 then dth_data_bits_index dup 1 + to dth_data_bits_index dth_bits!
+     bit_39_location 2 +  bit_39_location 2 + 80 -  
+     ?do
+ 	i timings@ start_bit_value >
+ 	if 1 else 0 then dth_data_bits_index dup 1 + to dth_data_bits_index dth_bits!
     2 +loop ;
 
 : seebits ( -- ) \ displays the dth bits recieved as interpreted
@@ -217,9 +222,9 @@ s\" \n ****\n" cmdlinerm $!
     then ;
 
 : check_header ( -- )
-    0 transitions@ 100 > if no_header_fail throw then
-    1 transitions@ 100 > if no_header_fail throw then
-    2 transitions@ 100 > if no_header_fail throw then ;
+    0 transitions@ header_values > if no_header_fail throw then
+    1 transitions@ header_values > if no_header_fail throw then
+    2 transitions@ header_values > if no_header_fail throw then ;
 
 : testit ( -- ) \ testing word to show data from dth device
     \ dth_get_data
@@ -231,7 +236,7 @@ s\" \n ****\n" cmdlinerm $!
     seebits
     cr get_dth_data . . ;
 
-: dth_parse ( -- ntemp nhumd nflag )
+: dth_parse ( -- nhumd ntemp nflag )
     try
 	dth_get_data transitions check_header timings find_start_bit dth_bits get_dth_data false
     restore dup if 0 swap 0 swap then
@@ -245,11 +250,11 @@ s\" \n ****\n" cmdlinerm $!
 	r/o open-pipe throw { mypipe }
 	pad 80 mypipe read-file throw
 	mypipe close-pipe throw drop 
-	pad swap 2dup dump cr
+	pad swap 2dup dump cr \ remove the dump after testing is done
 	cmdlinerm $@len -  \ this removes the added cli string that should always be there
 	s>number?
 	if
-	    d>s 8 <=  \ ensure only one process is running... this process
+	    d>s 10 <=  \ ensure only one process is running... this process
 	    \ 5
 	    if false else true then
 	else
@@ -261,20 +266,20 @@ s\" \n ****\n" cmdlinerm $!
 : get_temp_humd ( -- )
     dth_busy? false =
     if
-	10 { ntimes } 1 2 3
+	retry-times { ntimes } 1 2 3
 	begin
 	    drop drop drop
 	    ntimes 0 >
 	    if
 		ntimes 1 - to ntimes
 		dth_parse dup 0 = if true else  false 2000 ms then
-	    else 0 0 10_trys_fail true
+	    else 0 0 50_trys_fail true
 	    then
 	until
     else
 	0 0 dth_busy_fail
     then
-    . . . ;
+    . . . cr ;
 
 : pin_check ( npin -- nflag ) \ false returned means pin not allowed true returned means pin is allowed for dth sensor
     case
@@ -300,7 +305,9 @@ s\" \n ****\n" cmdlinerm $!
 	." -22_P9_12  use for dth22 sensor on P9_12 pin of BBB " cr
 	." -11_P9_12  use for dth11 sensor on P9_12 pin of BBB " cr
 	." -22_PH_XX  use for dth22 sensor on Header H pin XX of BBB " cr
-	." Replace H with 8 or 9 and XX with a number for header pin. Not all pins can be used with this sensors. Use Header ground and header 3.3 volts supply only for DTH sensor." cr
+	." Replace H with 8 or 9 and XX with a number for header pin." cr
+	." Not all pins can be used with this sensors." cr
+	." Use Header ground and header 3.3 volts supply only for DTH sensor." cr
 	2drop bye
     then
     s" -22_" search
@@ -315,7 +322,9 @@ s\" \n ****\n" cmdlinerm $!
     ." -22_P9_12  use for dth22 sensor on P9_12 pin of BBB " cr
     ." -11_P9_12  use for dth11 sensor on P9_12 pin of BBB " cr
     ." -22_PH_XX  use for dth22 sensor on Header H pin XX of BBB " cr
-    ." Replace H with 8 or 9 and XX with a number for header pin. Not all pins can be used with this sensors. Use Header ground and header 3.3 volts supply only for DTH sensor." cr
+    ." Replace H with 8 or 9 and XX with a number for header pin." cr
+    ." Not all pins can be used with this sensors." cr
+    ." Use Header ground and header 3.3 volts supply only for DTH sensor." cr
     2drop bye ;
 
-\ config-dth-type
+ config-dth-type

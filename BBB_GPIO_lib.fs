@@ -139,6 +139,8 @@ c-library myBBBGPIO
 \c } else {
 \c return (IOBAD); } }
 
+\c int gpioreadf(void) { return (*(gpio + GPIO_DATAIN) & bits); }
+
 \c void  gpioset(void) {
 \c if(gpio_setup == IOGOOD){
 \c /* this method reads current output bits and ors new bits to them */
@@ -160,6 +162,7 @@ c-function bbbiooutput   gpiooutput        -- void
 c-function bbbioread     gpioread        a -- n
 c-function bbbioset      gpioset           -- void
 c-function bbbioclear    gpioclear         -- void
+c-function bbbioreadf    gpioreadf         -- n
 
 end-c-library
 \ NOTE: Do not connect 5V logic level signals to these pins or the board will be damaged.
