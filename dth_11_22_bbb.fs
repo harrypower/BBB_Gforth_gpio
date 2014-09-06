@@ -216,13 +216,13 @@ s\" \n ****\n" cmdlinerm $!
     dth-11-22? 11 =
     if
 	nrh 10 * to nrh  nt 10 * to nt
-	nrh 90 <= nrh 20 >=  and if nrh else  TorH_bad_fail throw  then
-	nt 50 <= 0 >= and if nt else TorH_bad_fail throw then  
+	nrh 900 <= nrh 200 >=  and if nrh else  TorH_bad_fail throw  then
+	nt 500 <= 0 >= and if nt else TorH_bad_fail throw then  
     else
 	nrh 256 * nrhd + to nrh
 	nt 128 >= if nt 127 and 256 * ntd + -1 * else nt 256 * ntd + then to nt
-	nrh 100 <= nrh 0 >= and if nrh else TorH_bad_fail throw then
-	nt 80 <= nt -40 >= and if nt else TorH_bad_fail throw then
+	nrh 1000 <= nrh 0 >= and if nrh else TorH_bad_fail throw then
+	nt 800 <= nt -400 >= and if nt else TorH_bad_fail throw then
     then ;
 
 : check_header ( -- )
