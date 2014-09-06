@@ -36,7 +36,6 @@
 \ This is needed because the sensor could possibly be damaged if the same pin is accessed by by two running codes.
 \
 \ The DTH11 or DTH22 sensor are 4 pin devices.
-\ ***************** rewrite this for BBB **********
 \ Pin 1 should be hooked up to P9_4 pin for 3.3 volts.
 \ Pin 4 should be hooked up to P9_1 pin for digital ground or any other digital ground on P9 header.
 \ Pin 3 is not used
@@ -46,7 +45,7 @@
 \ Note if you are using the default BBB device tree overlay and can confirm pullup is on with bonescript getPinMode() function
 \ then you do not need to use a pull up resistor.  You can also force the pullup by setting it with bonescript pinMode() function.
 \ The pin header orientation should be confirmed or you will damage your BBB!
-\ ******************************
+
 
 \ error 1000 -- to many transitions have happened to be a proper message from dth device
 \ error 1001 -- failed to find bit # 40 in data sample so data is bad
@@ -219,7 +218,7 @@ s\" \n ****\n" cmdlinerm $!
     nrh nrhd + nt + ntd + 255 and nack <> if checksum_fail throw then
     dth-11-22? 11 =
     if
-	nrh 10 * to nrh  nt 10 * to nt
+	nrh 10 * to nrh  nt 10 * to nt 
 	nrh 900 <= nrh 200 >=  and if nrh else  TorH_bad_fail throw  then
 	nt 500 <= 0 >= and if nt else TorH_bad_fail throw then  
     else
@@ -229,10 +228,10 @@ s\" \n ****\n" cmdlinerm $!
 	nt 800 <= nt -400 >= and if nt else TorH_bad_fail throw then
     then ;
 
-: check_header ( -- )
+: check_header ( -- )  \ just looks at the first transistion times and bails if pasted header_values
     0 transitions@ header_values > if no_header_fail throw then
-    1 transitions@ header_values > if no_header_fail throw then
-    2 transitions@ header_values > if no_header_fail throw then ;
+    1 transitions@ header_values > if no_header_fail throw then ;
+    \ 2 transitions@ header_values > if no_header_fail throw then ;
 
 : testit ( -- ) \ testing word to show data from dth device
     \ dth_get_data
@@ -246,7 +245,8 @@ s\" \n ****\n" cmdlinerm $!
 
 : dth_parse ( -- nhumd ntemp nflag )
     try
-	dth_get_data transitions check_header timings find_start_bit dth_bits get_dth_data false
+	dth_get_data transitions check_header 
+	timings find_start_bit dth_bits get_dth_data false
     restore dup if 0 swap 0 swap then
     endtry ;
 
