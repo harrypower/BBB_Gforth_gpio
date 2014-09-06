@@ -62,7 +62,7 @@ include string.fs
 1003 constant dth_busy_fail
 1004 constant 50_trys_fail
 1005 constant no_header_fail
-1006 constant bit_0_not_found_fail
+1006 constant TorH_bad_fail
 
 3000 constant max_data_quantity
 100 constant max_transitions
@@ -215,10 +215,14 @@ s\" \n ****\n" cmdlinerm $!
     nrh nrhd + nt + ntd + 255 and nack <> if checksum_fail throw then
     dth-11-22? 11 =
     if
-	nrh 10 *  nt 10 *
+	nrh 10 * to nrh  nt 10 * to nt
+	nrh 90 <= nrh 20 >=  and if nrh else  TorH_bad_fail throw  then
+	nt 50 <= 0 >= and if nt else TorH_bad_fail throw then  
     else
-	nrh 256 * nrhd +
-	nt 128 >= if nt 127 and 256 * ntd + -1 * else nt 256 * ntd + then
+	nrh 256 * nrhd + to nrh
+	nt 128 >= if nt 127 and 256 * ntd + -1 * else nt 256 * ntd + then to nt
+	nrh 100 <= nrh 0 >= and if nrh else TorH_bad_fail throw then
+	nt 80 <= nt -40 >= and if nt else TorH_bad_fail throw then
     then ;
 
 : check_header ( -- )
@@ -250,12 +254,11 @@ s\" \n ****\n" cmdlinerm $!
 	r/o open-pipe throw { mypipe }
 	pad 80 mypipe read-file throw
 	mypipe close-pipe throw drop 
-	pad swap 2dup dump cr \ remove the dump after testing is done
+	pad swap \ 2dup dump cr \ remove the dump after testing is done
 	cmdlinerm $@len -  \ this removes the added cli string that should always be there
 	s>number?
 	if
-	    d>s 10 <=  \ ensure only one process is running... this process
-	    \ 5
+	    d>s 3 <=  \ ensure only one process is running... this process
 	    if false else true then
 	else
 	    2drop true
