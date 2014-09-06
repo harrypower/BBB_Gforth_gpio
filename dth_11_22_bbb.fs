@@ -20,10 +20,12 @@
 \    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 \ This gforth code is used as follows:
-\ **************** rewrite for BBB
-\ sudo ./dth_11_22.fs -11_24 to read the dth11 sensor on pin 24 with a 5 k resistor pullup to 3.3 volts.
-\ *************************
-\ The code needs gforth installed on your Beagle Bone Black rev c and version 0.7.0 up should work properly.
+\ sudo ./dth_11_22.fs -11_P9_12 to read the dth11 sensor on pin 12 of P9 header.  I tested this by using
+\ the default setup on that pin.  This default is pullup enabled and pin configured as GPIO1_28.  You can
+\ also set these conditions up using the device tree overlay process or bonescript pinMode() function.
+\ I have only enabled the use of P9_12 at this moment!
+\ The code needs gforth installed on your Beagle Bone Black rev c and version 0.7.3 up should work properly.
+\ If you want this code to work on version 0.7.0 Gforth remove the /local from the path above!
 \ Use ./dth_11_22.fs -help to see other options for sensor use and pin use.
 \ The code will simply put out with stdout to give you values of error, temperature, humidity.
 \ The values are as follows:
@@ -35,13 +37,15 @@
 \
 \ The DTH11 or DTH22 sensor are 4 pin devices.
 \ ***************** rewrite this for BBB **********
-\ Pin 1 should be hooked up to GPIO pin #1 for 3.3 volts.
-\ Pin 4 should be hooked up to GPIO pin #6 for digital ground or any other digital ground on the GPIO header (14,20,25,9)
+\ Pin 1 should be hooked up to P9_4 pin for 3.3 volts.
+\ Pin 4 should be hooked up to P9_1 pin for digital ground or any other digital ground on P9 header.
 \ Pin 3 is not used
-\ Pin 2 is conneced to the GPIO pin you want to talk to the device with and is the same pin that you pass as argument to this code.
+\ Pin 2 is conneced to P9_12 pin as that is the only pin that i have allowed this software to use at this time.
 \ Note this communication pin is not to be shared with any other device.
-\ Pin 2 also needs a pull up resister of 5k to 3.3 volts only as any other voltage will damage the Pi ( GPIO pin #1 should be used)
-\ The pin #'s to case orientation should be found online to confirm you got it correct as hookin this up wrong may damage your pi!
+\ Pin 2 also needs a pull up resister of 5k to 3.3 volts only as any other voltage will damage the BBB.
+\ Note if you are using the default BBB device tree overlay and can confirm pullup is on with bonescript getPinMode() function
+\ then you do not need to use a pull up resistor.  You can also force the pullup by setting it with bonescript pinMode() function.
+\ The pin header orientation should be confirmed or you will damage your BBB!
 \ ******************************
 
 \ error 1000 -- to many transitions have happened to be a proper message from dth device
