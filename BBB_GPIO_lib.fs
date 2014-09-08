@@ -28,6 +28,7 @@ c-library myBBBGPIO
 \c #include <stdlib.h>
 \c #include <sys/stat.h>
 \c #include <fcntl.h>
+\c #include <errno.h>
 
 \c #define GPIO0_BASE 0x44E07000
 \c #define GPIO1_BASE 0x4804C000
@@ -75,7 +76,7 @@ c-library myBBBGPIO
     
 \c /* open /dev/mem */
 \c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
-\c     printf("can't open /dev/mem \n");
+\c     fprintf(stderr,"can't open /dev/mem error: %s\n",strerror(errno));
 \c     return(gpio_setup); }
 
 \c /* mmap GPIO */
@@ -84,7 +85,7 @@ c-library myBBBGPIO
 
 \c /* mmap fail test */    
 \c if (gpio_map == MAP_FAILED) {
-\c     printf("mmap error %d\n", (int)gpio_map);
+\c     fprintf(stderr,"mmap error: %d more: %s\n", (int)gpio_map,strerror(errno));
 \c     return(gpio_setup); }
 
 \c bits = gpio_bits ;
@@ -207,7 +208,9 @@ end-c-library
 \ This will set the previously registered bank and gpio bits to output mode.
 \ Use this before a bbbioset or bbbioclear words for output functions.
 
-\ bbbioread  ( -- nvalue )
+\ bbbioread  ( addrvalue -- nflag )
+\ addrvalue is an address for a variable that will be used to return the value 
+\ nflag is false if the read value in addrvalue is valid.  It is true if data is not valid.
 \ This will return the currently read value from previously registed bank and gpio bits.
 \ You can read as many times as you want as long as before the first read you use
 \ the word bbbioinput to set that mode.  
@@ -221,6 +224,14 @@ end-c-library
 \ but this is dependent on the internal gate methods used to put data into the
 \ GPIO_DATAIN register of the SOC.  When doing this it seems like the pins on P8 or P9
 \ do in fact change with the output and the read values changes with them!
+
+\ bbbioreadf ( -- nvalue )
+\ This will read the internal read register reguardless of the mode you are in 
+\ and return the 32 bit value of that register.  This read is not destructive 
+\ so nothing will happen if you are not in input mode but it may not have 
+\ the correct data you want if you are not in input mode.  
+\ The this word is faster the bbbioread because you do not need to pass an address 
+\ to the word.
 
 \ bbbioset ( -- ) 
 \ This will turn on the bank and gpio bit that was previously set with bbbiosetup
@@ -274,3 +285,16 @@ end-c-library
 \ bbbiocleanup throw
 
 \ This example will read P9_12 header pin 
+
+\ example #4
+\ 1 constant bank1
+\ 0x10000000 constant gpio28
+\ bank1 gpio28 bbbiosetup throw
+\ bbbioinput
+\ bbbioreadf gpio28 = cr ." P9_12 " [if] ." is High" [else] ." is Low" [then]
+\ bbbiocleanup throw
+\
+\ This example will read P9_12 header pin.  Testing has shown this to be twice as fast as bbbioread.
+\ The reason for the increased speed is because this word does not need to pass anything to the read
+\ function.  This demistrates passing things back and forth from Gforth to C is the main performace 
+\ barrier here not the C code running or the Gforth code running as they are fast!
