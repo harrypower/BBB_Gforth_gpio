@@ -1,0 +1,11 @@
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.a
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.la
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.lai
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.o
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.so
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.so.0
+sudo rm /root/.gforth/libcc-named/.libs/myBBBi2c.so.0.0.0
+sudo rm /root/.gforth/libcc-named/myBBBi2c.c
+sudo rm /root/.gforth/libcc-named/myBBBi2c.la
+sudo rm /root/.gforth/libcc-named/myBBBi2c.lo
+sudo rm /root/.gforth/libcc-named/myBBBi2c.o

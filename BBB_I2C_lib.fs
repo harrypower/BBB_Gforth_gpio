@@ -169,5 +169,15 @@ c-library myBBBi2c
 \c   return(length);
 \c }
 
-c-function
+c-function bbbi2copen        i2c_open                        n n -- n
+c-function bbbi2cwrite       i2c_write                     n a n -- n
+c-function bbbi2cwrite-b     i2c_write_byte                  n n -- n
+c-function bbbi2cread        i2c_read                      n a n -- n
+c-function bbbi2cread-b      i2c_read_byte                   n a -- n
+c-function bbbi2cclose       i2c_close                         n -- n
+c-function bbbi2cwriteread   i2c_write_read        n n a n n a n -- n
+c-function bbbwrite-ign-nack i2c_write_ignore_nack       n n a n -- n
+c-function bbbread-no-ack    i2c_read_no_ack             n n a n -- n
+
+end-c-library
 
