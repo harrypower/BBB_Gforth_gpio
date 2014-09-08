@@ -32,6 +32,9 @@ c-library myBBBi2c
 \c #include <fcntl.h>
 \c #include <errno.h>
 
+\c #define I2C_PASS 0 
+\c #define I2C_FAIL -1
+
 \c int i2c_open(unsigned char bus, unsigned char addr)
 \c {
 \c  int file;
@@ -45,7 +48,7 @@ c-library myBBBi2c
 \c  if (ioctl(file,I2C_SLAVE,addr) < 0)
 \c  {
 \c    fprintf(stderr, "i2c_open ioctl error: %s\n", strerror(errno));
-\c    return(-1);
+\c    return(I2C_FAIL);
 \c  }
 \c  return(file);
 \c }
@@ -55,7 +58,7 @@ c-library myBBBi2c
 \c  if (write(handle, buf, length) != length)
 \c  {
 \c    fprintf(stderr, "i2c_write error: %s\n", strerror(errno));
-\c    return(-1);
+\c    return(I2C_FAIL);
 \c  }
 \c  return(length);
 \c }
@@ -65,9 +68,9 @@ c-library myBBBi2c
 \c  if (write(handle, &val, 1) != 1)
 \c  {
 \c     fprintf(stderr, "i2c_write_byte error: %s\n", strerror(errno));
-\c     return(-1);
+\c     return(I2C_FAIL);
 \c   }
-\c   return(1);
+\c   return(I2C_PASS);
 \c }
 
 \c int i2c_read(int handle, unsigned char* buf, unsigned int length)
@@ -75,7 +78,7 @@ c-library myBBBi2c
 \c   if (read(handle, buf, length) != length)
 \c   {
 \c     fprintf(stderr, "i2c_read error: %s\n", strerror(errno));
-\c     return(-1);
+\c     return(I2C_FAIL);
 \c   }
 \c   return(length);
 \c }
@@ -85,9 +88,9 @@ c-library myBBBi2c
 \c   if (read(handle, val, 1) != 1)
 \c   {
 \c     fprintf(stderr, "i2c_read_byte error: %s\n", strerror(errno));
-\c     return(-1);
+\c     return(I2C_FAIL);
 \c   }
-\c   return(1);
+\c   return(I2C_PASS);
 \c }
 
 \c int i2c_close(int handle)
@@ -95,9 +98,9 @@ c-library myBBBi2c
 \c   if ((close(handle)) != 0)
 \c   {
 \c     fprintf(stderr, "i2c_close error: %s\n", strerror(errno));
-\c     return(-1);
+\c     return(I2C_FAIL);
 \c   }
-\c   return(0);
+\c   return(I2C_PASS);
 \c }
 
 \c int i2c_write_read(int handle, unsigned char addr_w, unsigned char *buf_w, unsigned int len_w,
@@ -122,7 +125,7 @@ c-library myBBBi2c
 \c 	if (ioctl(handle,I2C_RDWR,(unsigned long)&msgset)<0)
 \c   { 
 \c 	fprintf(stderr, "i2c_write_read error: %s\n",strerror(errno));
-\c     return -1;
+ \c     return (I2C_FAIL);
 \c   } 
 \c   return(len_r);
 \c }
@@ -143,7 +146,7 @@ c-library myBBBi2c
 \c 	if (ioctl(handle,I2C_RDWR,(unsigned long)&msgset)<0)
 \c   { 
 \c 	fprintf(stderr, "i2c_write_ignore_nack error: %s\n",strerror(errno));
-\c     return -1;
+ \c     return (I2C_FAIL);
 \c   } 
 \c   return(length);
 \c }
@@ -164,7 +167,7 @@ c-library myBBBi2c
 \c 	if (ioctl(handle,I2C_RDWR,(unsigned long)&msgset)<0)
 \c   {
 \c 	fprintf(stderr, "i2c_read_no_ack error: %s\n",strerror(errno));
-\c     return -1;
+\c      return (I2C_FAIL);
 \c   } 
 \c   return(length);
 \c }
