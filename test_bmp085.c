@@ -11,7 +11,7 @@
 #define I2CBUS 1
 
 // set to 1 to print out the intermediate calculations
-#define DBG_PRINT 0
+#define DBG_PRINT 1
 // set to 1 to use the example values in the datasheet
 // rather than the values retrieved via i2c
 #define ALG_TEST 0
