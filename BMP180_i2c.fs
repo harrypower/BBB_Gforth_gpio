@@ -30,6 +30,7 @@ require BBB_I2C_lib.fs
 1       constant i2cbus
 
 0 value i2c-handle
+create buff 0 c, 0 c, 0 c,  \ make room for 3 bytes 
 
 struct
     char% field data%
@@ -82,3 +83,35 @@ i2c-handle eeprom-data EEprom bbbi2cread i2ctest
 18 getsigned-calvalue   cal-para mc !
 20 getsigned-calvalue   cal-para md !
 \ now all the calibration data is retreaved and put in variables
+
+\ read uncompensated temperature register
+0xf4 buff c!
+0x2e buff 1 + c!
+i2c-handle buff 2 bbbi2cwrite i2ctest
+6 ms
+i2c-handle 0xf6 bbbi2cwrite-b throw 
+i2c-handle buff 2 bbbi2cread i2ctest
+buff c@ 8 lshift buff 1 + c@ or value ut
+
+\ read uncompensated pressure register
+0xf4 buff c!
+0x34 OVERSAMPLING_ULTRA_LOW_POWER 6 lshift + buff 1 + c!
+i2c-handle buff 2 bbbi2cwrite i2ctest
+OVERSAMPLING_ULTRA_LOW_POWER 1 + 10 * ms
+i2c-handle 0xf6 bbbi2cwrite-b throw
+i2c-handle buff 3 bbbi2cread i2ctest
+buff c@ 16 lshift buff 1 + c@ 8 lshift or buff 2 + c@ or
+8 OVERSAMPLING_ULTRA_LOW_POWER - rshift value up
+
+\ done with i2c communications
+i2c-handle bbbi2cclose throw
+
+\ compensate temperature
+ut cal-para ac6 @ - s>f
+cal-para ac5 @ s>f f*
+32768e f/ create x1 f,
+cal-para mc @ s>f 2048e f*
+x1 f@ cal-para md @ s>f f+ f/ create x2 f,
+x1 f@ x2 f@ f+ create b5 f,
+b5 f@ 8e f+ 16e f/ create t f,
+t f@ 10e f/ create deg f,
