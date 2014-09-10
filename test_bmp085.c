@@ -14,7 +14,7 @@
 #define DBG_PRINT 1
 // set to 1 to use the example values in the datasheet
 // rather than the values retrieved via i2c
-#define ALG_TEST 0
+#define ALG_TEST 1
 
 typedef struct bmp085_coeff_s
 {
