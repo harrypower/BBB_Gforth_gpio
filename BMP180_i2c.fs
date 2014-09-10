@@ -157,11 +157,15 @@ up b3 @ - 50000 OVERSAMPLING_ULTRA_LOW_POWER rshift m* d>s create b7 ,
 b7 @ 0 <
 [if] b7 @ 1 lshift b4 @ / 
 [else] b7 @ b4 @ / 2 * 
-[then]
-create pa ,
+[then] create p ,
+p @ 256 / dup * x1 !
+x1 @ 3038 * 16 rshift x1 !
+-7358 p @ m* d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d>s x2 !
+x1 @ x2 @ + 3791 + 16 / p @ + create pa ,
+
 
 ." Temperature is " deg @ . ."  C" cr
 
 ." Pressure is " pa @  . ."  pa" cr 
-bye
+
 
