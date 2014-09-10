@@ -18,7 +18,7 @@
 
 require BBB_I2C_lib.fs
 
-true    constant datasheet   \ set to true to test with data sheet data false for normal operation
+false    constant datasheet   \ set to true to test with data sheet data false for normal operation
 
 22      constant EEprom      \ the size of calibration data eeprom on bmp180 device in bytes
 0x77    constant BMP180ADDR  \ I2C address of BMP180 device
@@ -141,7 +141,7 @@ cal-para mc @  2048
 x1 @ cal-para md @ + */ create x2 ,
 x1 @ x2 @ + create b5 ,
 b5 @ 8 + 16 / create t ,
-t @ 10 / create deg ,
+t @ create deg ,
 
 \ compensate pressure
 b5 @ 4000 - create b6 ,
@@ -149,9 +149,9 @@ b6 @ dup  4096 */ cal-para b2 @ 2048 */ x1 !
 cal-para ac2 @ b6 @ 2048 */ x2 !
 x2 @ x1 @ + create x3 ,
 cal-para ac1 @ 4 * x3 @ + OVERSAMPLING_ULTRA_LOW_POWER lshift 2 + 4 / create b3 ,
-cal-para ac3 @ b6 @ * 13 rshift x1 !
-cal-para b1 @ b6 @ dup * 12 rshift * 16 rshift x2 !
-x1 @ x2 @ + 2 + 2 rshift x3 !
+cal-para ac3 @ b6 @ * 8192 / x1 !
+cal-para b1 @ b6 @ dup * 4096 / * 65536 / x2 !
+x1 @ x2 @ + 2 + 4 / x3 !
 cal-para ac4 @ x3 @ 32768 + 32768 */ create b4 ,
 up b3 @ - 50000 OVERSAMPLING_ULTRA_LOW_POWER rshift m* d>s create b7 ,
 b7 @ 0 <
@@ -159,8 +159,8 @@ b7 @ 0 <
 [else] b7 @ b4 @ / 2 * 
 [then] create p ,
 p @ 256 / dup * x1 !
-x1 @ 3038 * 16 rshift x1 !
--7358 p @ m* d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d2/ d>s x2 !
+x1 @ 3038 * 65536 / x1 !
+-7358 p @ m* 65536 sm/rem swap drop x2 !
 x1 @ x2 @ + 3791 + 16 / p @ + create pa ,
 
 
@@ -168,4 +168,4 @@ x1 @ x2 @ + 3791 + 16 / p @ + create pa ,
 
 ." Pressure is " pa @  . ."  pa" cr 
 
-
+bye
