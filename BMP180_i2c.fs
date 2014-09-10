@@ -134,35 +134,34 @@ datasheet [if]
 i2c-handle bbbi2cclose throw
 
 \ compensate temperature
-ut cal-para ac6 @ - s>f
-cal-para ac5 @ s>f f*
-32768e f/ create x1 f,
-cal-para mc @ s>f 2048e f*
-x1 f@ cal-para md @ s>f f+ f/ create x2 f,
-x1 f@ x2 f@ f+ create b5 f,
-b5 f@ 8e f+ 16e f/ create t f,
-t f@ 10e f/ create deg f,
+ut cal-para ac6 @ - 
+cal-para ac5 @ 
+32768 */ create x1 ,
+cal-para mc @  2048 
+x1 @ cal-para md @ + */ create x2 ,
+x1 @ x2 @ + create b5 ,
+b5 @ 8 + 16 / create t ,
+t @ 10 / create deg ,
 
 \ compensate pressure
-b5 f@ 4000e f- create b6 f,
-b6 f@ fdup f* 4096e f/ cal-para b2 @ s>f f* 2048e f/ x1 f!
-cal-para ac2 @ s>f b6 f@ f* 2048e f/ x2 f!
-x2 f@ x1 f@ f+ create x3 f,
-cal-para ac1 @ s>f 4e f* x3 f@ f+ f>s OVERSAMPLING_ULTRA_LOW_POWER lshift 2 + s>f 4e f/ create b3 f,
-cal-para ac3 @ s>f b6 f@ f* 8192e f/ x1 f!
-cal-para b1 @ s>f b6 f@ fdup f* 4096e f/ f* 65536e f/ x2 f!
-x1 f@ x2 f@ f+ 2e f+ 4e f/ x3 f!
-cal-para ac4 @ s>f x3 f@ 32768e f+ f* 32768e f/ create b4 f,
-up s>f b3 f@ f- 50000 OVERSAMPLING_ULTRA_LOW_POWER rshift s>f f* create b7 f,
-b7 f@ 2e f* b4 f@ f/ create pa f,
+b5 @ 4000 - create b6 ,
+b6 @ dup  4096 */ cal-para b2 @ 2048 */ x1 !
+cal-para ac2 @ b6 @ 2048 */ x2 !
+x2 @ x1 @ + create x3 ,
+cal-para ac1 @ 4 * x3 @ + OVERSAMPLING_ULTRA_LOW_POWER lshift 2 + 4 / create b3 ,
+cal-para ac3 @ b6 @ * 13 rshift x1 !
+cal-para b1 @ b6 @ dup * 12 rshift * 16 rshift x2 !
+x1 @ x2 @ + 2 + 2 rshift x3 !
+cal-para ac4 @ x3 @ 32768 + 32768 */ create b4 ,
+up b3 @ - 50000 OVERSAMPLING_ULTRA_LOW_POWER rshift m* d>s create b7 ,
+b7 @ 0 <
+[if] b7 @ 1 lshift b4 @ / 
+[else] b7 @ b4 @ / 2 * 
+[then]
+create pa ,
 
-create floatoutputbuffer
-10 allot 
-: fto$ ( f: r -- caddr u ) \ convert r from float stack to string
-        floatoutputbuffer 4 1 0 f>buf-rdp floatoutputbuffer 10 ;
+." Temperature is " deg @ . ."  C" cr
 
-." Temperature is " deg f@ fto$ type ."  C" cr
-
-." Pressure is " pa f@ f>s . ."  pa" cr 
+." Pressure is " pa @  . ."  pa" cr 
 bye
 
