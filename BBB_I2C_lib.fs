@@ -184,3 +184,18 @@ c-function bbbread-no-ack    i2c_read_no_ack             n n a n -- n
 
 end-c-library
 
+    \ All the i2c words return a value.  Some words also get passed a pointer so data can be passed to forth also.
+    \ Following is a list of what that return value means per word:
+    \ bbbi2copen        returns -1 or a file handle
+    \ bbbi2cwrite       returns -1 or a length count ( note if lenght count is 0 that means 0 bytes sent)
+    \ bbbi2cwrite-b     returns -1 or 0 this 0 is a pass condition
+    \ bbbi2cread        returns -1 or a length count ( if lenght count is 0 that means 0 bytes read)
+    \ bbbi2cread-b      returns -1 or 0 this 0 is a pass condition
+    \ bbbi2cclose       returns -1 or 0 this 0 is a pass condition
+    \ bbbi2cwriteread   returns -1 or a length count ( if length count is 0 that means 0 bytes read)
+    \ bbbwrite-ign-nack returns -1 or a length count ( if length count is 0 that means 0 bytes sent)
+    \ bbbread-no-ack    returns -1 or a length count ( if length count is 0 that means 0 bytes read)
+    \ So the idea here is if a words returns -1 it is a clear protocal failure.  If it is a 0 lentgh count returned
+    \ then you can see that in most cases that means something was not sent or recieved but it may not be
+    \ and error.  The three words bbbi2cwrite-b, bbbi2cread-b and bbbi2cclose the 0 returned always means a pass for
+    \ the function.   This should help in determining what to do based on the returned value!
