@@ -1,3 +1,8 @@
+#! /usr/local/bin/gforth
+\ the above line works on 0.7.3 gforth and up
+\ #! /usr/bin/gforth
+\ version 0.7.0 has the /local removed from the path to work
+
 \ This Gforth code reads BMP180 pressure temperature sensor via i2c on BBB rev c hardware 
 \    Copyright (C) 2014  Philip K. Smith
 
@@ -88,19 +93,19 @@ i2c-handle eeprom-data EEprom bbbi2cread i2ctest
 
 \ test with original data
 datasheet [if]
-408 cal-para ac1 !
--72 cal-para ac2 !
--14383 cal-para ac3 !
-32741 cal-para ac4 !
-32757 cal-para ac5 !
-23153 cal-para ac6 !
-6190 cal-para b1 !
-4 cal-para b2 !
--32768 cal-para mb !
--8711 cal-para mc !
-2868 cal-para md !
+408     cal-para ac1 !
+-72     cal-para ac2 !
+-14383  cal-para ac3 !
+32741   cal-para ac4 !
+32757   cal-para ac5 !
+23153   cal-para ac6 !
+6190    cal-para b1 !
+4       cal-para b2 !
+-32768  cal-para mb !
+-8711   cal-para mc !
+2868    cal-para md !
 [then]
-    
+
 \ read uncompensated temperature register
 0xf4 buff c!
 0x2e buff 1 + c!
@@ -164,8 +169,8 @@ x1 @ 3038 * 65536 / x1 !
 x1 @ x2 @ + 3791 + 16 / p @ + create pa ,
 
 
-." Temperature is " deg @ . ."  C" cr
+." T(c): " deg @ s>f 10e f/ 4 1 1 f.rdp cr
 
-." Pressure is " pa @  . ."  pa" cr 
+." P(pa): " pa @  . cr 
 
 bye
