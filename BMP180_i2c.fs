@@ -34,7 +34,7 @@ false    constant datasheet   \ set to true to test with data sheet data false f
 1	constant OVERSAMPLING_STANDARD
 2	constant OVERSAMPLING_HIGH_RESOLUTION 
 3	constant OVERSAMPLING_ULTRA_HIGH_RESOLUTION
-1       constant i2cbus
+1       constant i2cbus  \ note this is the linux enumerated i2c address but physically it is i2c2 not i2c1
 
 0 value i2c-handle
 create buff 0 c, 0 c, 0 c,  \ make room for 3 bytes 
