@@ -98,8 +98,8 @@ create abuffer 3 allot     \ for transfering in and out of device
 
 setup-htu21d throw
 read-THcorrected throw
-." H(%rh): " . cr
-." T(c): " . cr
+." H(%rh): " s>f 10e f/ 4 1 1 f.rdp cr
+." T(c): " s>f 10e f/ 4 1 1 f.rdp cr
 cleanup throw
 
 bye
