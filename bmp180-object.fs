@@ -131,9 +131,9 @@ object class
     ;m method doreading
     
   public
-    m: ( bmp180 -- temp humd nflag ) \ get temperature and pressure values
+    m: ( bmp180 -- temp press nflag ) \ get temperature and pressure values
 	\ note temp value needs to be divided by 10 for final value in deg. celsius
-	\ note humd value is in pascals
+	\ note press value is in pascals
 	\ note nflag is false if readings are valid
 	this ['] doreading catch dup 0 <>
 	if swap drop 0 swap 0 swap
