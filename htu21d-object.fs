@@ -30,7 +30,7 @@ object class
     cell% inst-var humd_read
     cell% inst-var abuffer     \ this is used as a 3 byte buffer cell% should allocate 4 bytes on 32 bit system
   protected
-    m: ( i2c -- temp )  \ reads and returns temperature on stack and floaging stack
+    m: ( i2c -- temp )  \ reads and returns temperature on stack and floating stack
 	( f: -- temp )
 	i2c_addr @ htu21d_addr @ bbbi2copen dup i2c_handle ! true = throw
 	i2c_handle @ temp_read @ bbbi2cwrite-b throw
@@ -45,8 +45,8 @@ object class
 	f>d d>s
 	i2c_handle @ bbbi2cclose true = throw ;m method read-temp
 
-    m: ( i2c -- humd )
-	( f: -- humd )
+    m: ( i2c -- humd )  \ reads and returns humidity on stack and floating stack
+	( f: -- humd )  \ note the humidity value is not corrected yet here!
 	i2c_addr @ htu21d_addr @ bbbi2copen dup i2c_handle ! true = throw
 	i2c_handle @ humd_read @ bbbi2cwrite-b throw
 	i2c_handle @ abuffer 3 bbbi2cread 3 <> throw
