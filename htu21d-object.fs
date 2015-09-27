@@ -20,7 +20,7 @@
 \    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require objects.fs
-require ../BBB_Gforth_gpio/BBB_I2C_lib.fs
+require BBB_I2C_lib.fs
 
 object class
     cell% inst-var i2c_handle
