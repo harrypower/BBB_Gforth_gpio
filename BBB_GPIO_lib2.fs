@@ -21,7 +21,7 @@
 \  This software works with Debian Wheezy and may work on other versions.
 
 
-c-library myBBBGPIO
+c-library myBBBGPIO2
 \c #include <stdio.h>
 \c #include <unistd.h>
 \c #include <sys/mman.h>
@@ -51,13 +51,11 @@ c-library myBBBGPIO
 \c volatile char *gpio_map;
 \c volatile unsigned *gpio;
 \c volatile int bits;
-\c volatile unsigned int out_en = 0;
-\c volatile unsigned int data_out = 0;
 \c volatile int gpio_setup = IOBAD;
 
 \c int gpiosetup(int gpio_bank, int gpio_bits ){
 \c unsigned int bank = 0;
-\c gpio_setup = IOBAD;
+\c if (gpio_setup == IOBAD) {
 \c switch(gpio_bank){
 \c case 0 :
 \c     bank = GPIO0_BASE;
@@ -93,28 +91,19 @@ c-library myBBBGPIO
 \c // Always use the volatile pointer!
 \c gpio = (volatile unsigned *)gpio_map;
 
-\c /* save GPIO_OE */
-\c out_en = *(gpio + GPIO_OE);
-
-\c /* save GPIO_DATAOUT */
-\c data_out = *(gpio + GPIO_DATAOUT);
-
 \c gpio_setup = IOGOOD;
-\c return (gpio_setup) ;}
+\c return (gpio_setup) ; }
+\c return (IOBAD); }
 
 \c int gpiocleanup(void) {
 \c int errors = gpio_setup;
 \c if(gpio_setup == IOGOOD){
-\c *(gpio + GPIO_OE) = out_en; // restore GPIO_OE
-\c *(gpio + GPIO_DATAOUT) = data_out; // restore GPIO_DATAOUT
 \c errors = close(mem_fd);
 \c mem_fd = 0;
 \c gpio_map = 0;
 \c areg = 0;
 \c gpio = 0;
 \c bits = 0;
-\c out_en = 0;
-\c data_out = 0;
 \c gpio_setup = IOBAD;
 \c } else {
 \c errors = IOBAD;
