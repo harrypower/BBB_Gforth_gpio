@@ -43,7 +43,7 @@ c-library myBBBGPIO
 \c #define GPIO_DATAOUT      (0x13c /4)
 \c #define GPIO_CLEARDATAOUT (0x190 /4)
 \c #define GPIO_SETDATAOUT   (0x194 /4)
-\c #define IOGOOD            0 
+\c #define IOGOOD            0
 \c #define IOBAD             -1
 
 \c volatile int mem_fd = 0;
@@ -51,20 +51,18 @@ c-library myBBBGPIO
 \c volatile char *gpio_map;
 \c volatile unsigned *gpio;
 \c volatile int bits;
-\c volatile unsigned int out_en = 0;
-\c volatile unsigned int data_out = 0;
 \c volatile int gpio_setup = IOBAD;
 
 \c int gpiosetup(int gpio_bank, int gpio_bits ){
 \c unsigned int bank = 0;
-\c gpio_setup = IOBAD;
+\c if (gpio_setup == IOBAD) {
 \c switch(gpio_bank){
 \c case 0 :
 \c     bank = GPIO0_BASE;
 \c     break;
 \c case 1 :
 \c     bank = GPIO1_BASE;
-\c     break;    
+\c     break;
 \c case 2 :
 \c     bank = GPIO2_BASE;
 \c     break;
@@ -73,7 +71,7 @@ c-library myBBBGPIO
 \c     break;
 \c default :
 \c     return(gpio_setup); }
-    
+
 \c /* open /dev/mem */
 \c if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
 \c     fprintf(stderr,"can't open /dev/mem error: %s\n",strerror(errno));
@@ -83,38 +81,29 @@ c-library myBBBGPIO
 \c gpio_map = (char *)mmap( 0, GPIO_SIZE, PROT_READ|PROT_WRITE,
 \c     MAP_SHARED, mem_fd, bank );
 
-\c /* mmap fail test */    
+\c /* mmap fail test */
 \c if (gpio_map == MAP_FAILED) {
 \c     fprintf(stderr,"mmap error: %d more: %s\n", (int)gpio_map,strerror(errno));
 \c     return(gpio_setup); }
 
 \c bits = gpio_bits ;
-    
+
 \c // Always use the volatile pointer!
 \c gpio = (volatile unsigned *)gpio_map;
 
-\c /* save GPIO_OE */
-\c out_en = *(gpio + GPIO_OE);
-
-\c /* save GPIO_DATAOUT */    
-\c data_out = *(gpio + GPIO_DATAOUT);
-    
 \c gpio_setup = IOGOOD;
-\c return (gpio_setup) ;}
+\c return (gpio_setup) ; }
+\c return (IOBAD); }
 
 \c int gpiocleanup(void) {
 \c int errors = gpio_setup;
 \c if(gpio_setup == IOGOOD){
-\c *(gpio + GPIO_OE) = out_en; // restore GPIO_OE
-\c *(gpio + GPIO_DATAOUT) = data_out; // restore GPIO_DATAOUT
 \c errors = close(mem_fd);
 \c mem_fd = 0;
 \c gpio_map = 0;
 \c areg = 0;
 \c gpio = 0;
 \c bits = 0;
-\c out_en = 0;
-\c data_out = 0;
 \c gpio_setup = IOBAD;
 \c } else {
 \c errors = IOBAD;
@@ -135,7 +124,7 @@ c-library myBBBGPIO
 
 \c int gpioread(unsigned *values) {
 \c if(gpio_setup == IOGOOD){
-\c *values = (*(gpio + GPIO_DATAIN) & bits); 
+\c *values = (*(gpio + GPIO_DATAIN) & bits);
 \c return (IOGOOD);
 \c } else {
 \c return (IOBAD); } }
@@ -172,51 +161,51 @@ end-c-library
 \ NO PINS ARE TO BE DRIVEN UNTIL AFTER THE SYS_RESET LINE GOES HIGH
 
 \ These gforth words have the ability to damage your Beagle Bone Black.
-\ With great power comes great responsibility!  Understand the above warnings from 
+\ With great power comes great responsibility!  Understand the above warnings from
 \ the Beagle Bone Black reference materials!
-\ Please ensure you understand how to use this code before hooking anything up 
+\ Please ensure you understand how to use this code before hooking anything up
 \ to your BBB.  I have been able to toggle pins on and off at 500 khz with this code.
-\ I have not needed faster then this speed.  It is possible with extending this 
-\ code with a toggling function. Testing with this idea i was able to reach around 
-\ 1 mhz. 
+\ I have not needed faster then this speed.  It is possible with extending this
+\ code with a toggling function. Testing with this idea i was able to reach around
+\ 1 mhz.
 
 \ bbbiosetup ( nbank ngpiobits -- nflag )
-\ This will set up the ability to access gpio nbank and ngpiobits 
+\ This will set up the ability to access gpio nbank and ngpiobits
 \ nbank is 0,1,2,3 any other number returns nflag of true (-1)
-\ ngpiobits is a 32 bit number one bit per gpio bit 
+\ ngpiobits is a 32 bit number one bit per gpio bit
 \ nflag is 0 for gpio operations all good any other value is an error
 \ ngpiobits allows many bits to be turned on at once or use it for just one bit.
-\ This code does not switch any modes or do any operations on registers 
+\ This code does not switch any modes or do any operations on registers
 \ but now other functions can be used to access the gpio functions.
-\ Note this is bank and gpiobits are not Beagle Bone Black P8 or P9 pins 
-\ so to find out what P8 or P9 pins are maped to gpio bits you need the 
+\ Note this is bank and gpiobits are not Beagle Bone Black P8 or P9 pins
+\ so to find out what P8 or P9 pins are maped to gpio bits you need the
 \ Beagle Bone Black schematics and the AM335x Technical Reference Manual
 
 \ bbbiocleanup ( -- nflag )
-\ This will release the mmap memory that is accessed in bbbiosetup and restore 
+\ This will release the mmap memory that is accessed in bbbiosetup and restore
 \ the values in GPIO_OE and GPIO_DATAOUT registers at bbbiosetup entry values
 \ thus restoring the output settings and the original output levels.
 \ Note if bbbiosetup was not called before this function then nflag is true (-1)
 \ and nothing happens to chip registers at all.
 \ This word should be used after you are done with gpio stuff!
 
-\ bbbioinput ( -- ) 
+\ bbbioinput ( -- )
 \ This will set the previously registered bank and gpio bits to input mode.
 \ Use this before a bbbioread function to read from the gpio bits.
 
-\ bbbiooutput ( -- ) 
+\ bbbiooutput ( -- )
 \ This will set the previously registered bank and gpio bits to output mode.
 \ Use this before a bbbioset or bbbioclear words for output functions.
 
 \ bbbioread  ( addrvalue -- nflag )
-\ addrvalue is an address for a variable that will be used to return the value 
+\ addrvalue is an address for a variable that will be used to return the value
 \ nflag is false if the read value in addrvalue is valid.  It is true if data is not valid.
 \ This will return the currently read value from previously registed bank and gpio bits.
 \ You can read as many times as you want as long as before the first read you use
-\ the word bbbioinput to set that mode.  
-\ No error will be returned if you are not in reading mode and the value  
-\ returned may not be the correct gpio bit value.  
-\ Note if you are not in reading  mode nothing will happen to the hardware 
+\ the word bbbioinput to set that mode.
+\ No error will be returned if you are not in reading mode and the value
+\ returned may not be the correct gpio bit value.
+\ Note if you are not in reading  mode nothing will happen to the hardware
 \ so no damage can happen with this command.
 \ Note if you did not use bbbiosetup before this word then nvalue will always be 0.
 \ I haved noticed you can set the gpio bits to output and then use this bbbioread word
@@ -226,43 +215,43 @@ end-c-library
 \ do in fact change with the output and the read values changes with them!
 
 \ bbbioreadf ( -- nvalue )
-\ This will read the internal read register reguardless of the mode you are in 
-\ and return the 32 bit value of that register.  This read is not destructive 
-\ so nothing will happen if you are not in input mode but it may not have 
-\ the correct data you want if you are not in input mode.  
-\ The this word is faster the bbbioread because you do not need to pass an address 
+\ This will read the internal read register reguardless of the mode you are in
+\ and return the 32 bit value of that register.  This read is not destructive
+\ so nothing will happen if you are not in input mode but it may not have
+\ the correct data you want if you are not in input mode.
+\ The this word is faster the bbbioread because you do not need to pass an address
 \ to the word.
 
-\ bbbioset ( -- ) 
+\ bbbioset ( -- )
 \ This will turn on the bank and gpio bit that was previously set with bbbiosetup
 \ Remember to use bbbiooutput before this word is used.
 \ You can use this word as many times as you want after setting output mode but
-\ realize you will not see a change after you set a bit unless you clear it 
+\ realize you will not see a change after you set a bit unless you clear it
 \ then set again.
-\ Note if you have not used bbbiooutput before this word nothing will happen 
-\ to output. 
-\ Note if you have not used bbbiosetup before this word nothing will happen to 
+\ Note if you have not used bbbiooutput before this word nothing will happen
+\ to output.
+\ Note if you have not used bbbiosetup before this word nothing will happen to
 \ the registers.
 
-\ bbbioclear ( -- ) 
-\ This will turn off the bank and gpio bit that was previously set with bbbiosetup 
+\ bbbioclear ( -- )
+\ This will turn off the bank and gpio bit that was previously set with bbbiosetup
 \ Remember to use bbbiooutput before this word is used.
 \ You can use this word as many times as you want after setting output mode but
 \ realize you will not see any change after you clear a bit unless you set the bit again
 \ then clear it.
 \ Note if you have not used bbbiooutput before this word nothing will happen to output.
-\ Note if you have not used bbbiosetup before this word nothing will happen to the 
+\ Note if you have not used bbbiosetup before this word nothing will happen to the
 \ registers.
 
 \ example #1
 \ 1 constant bank1
 \ 0x10000000 constant gpio28
-\ bank1 gpio28 bbbiosetup throw  
+\ bank1 gpio28 bbbiosetup throw
 \ bbbiooutput
 \ bbbioclear
 \ bbbioset
-\ bbbioclear 
-\ bbbiocleanup 
+\ bbbioclear
+\ bbbiocleanup
 
 \ The above example will put one pulse of low to high to low out on P9_12 header pin
 
@@ -271,9 +260,9 @@ end-c-library
 \ : toggle ( -- ) bbbioset bbbioclear ;
 \ : ntoggle ( n -- ) 0 ?do toggle loop ;
 \ : finishtoggle ( -- )  bbbiocleanup throw ;
-\ starttoggle 10 ntoggle finishtoggle 
+\ starttoggle 10 ntoggle finishtoggle
 
-\ This example will make a pulse train of 10 low to high pulse at P9_12 header pin 
+\ This example will make a pulse train of 10 low to high pulse at P9_12 header pin
 
 \ example #3
 \ 1 constant bank1
@@ -281,10 +270,10 @@ end-c-library
 \ variable pinvalue
 \ bank1 gpio28 bbbiosetup throw
 \ bbbioinput
-\ pinvalue bbbioread throw pinvalue @ gpio28 = cr ." P9_12 " [if] ." is High" [else] ." is Low" [then] 
+\ pinvalue bbbioread throw pinvalue @ gpio28 = cr ." P9_12 " [if] ." is High" [else] ." is Low" [then]
 \ bbbiocleanup throw
 
-\ This example will read P9_12 header pin 
+\ This example will read P9_12 header pin
 
 \ example #4
 \ 1 constant bank1
@@ -296,5 +285,5 @@ end-c-library
 \
 \ This example will read P9_12 header pin.  Testing has shown this to be twice as fast as bbbioread.
 \ The reason for the increased speed is because this word does not need to pass anything to the read
-\ function.  This demistrates passing things back and forth from Gforth to C is the main performace 
+\ function.  This demistrates passing things back and forth from Gforth to C is the main performace
 \ barrier here not the C code running or the Gforth code running as they are fast!
