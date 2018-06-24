@@ -63,7 +63,7 @@
 \ ********************************************************************************************
 
 require serial.fs
-require ./Gforth-Objects/objects.fs
+require ../Gforth-Objects/objects.fs
 require BBB_GPIO_lib.fs
 
 [ifundef] destruction
