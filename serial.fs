@@ -33,7 +33,7 @@
 \            also added gpl3 license
 \ termios structure
 
-require ./Gforth-Objects/stringobj.fs
+\ require ./Gforth-Objects/stringobj.fs
 require syscalls386.fs
 
 create termios 4 4 + 4 + 4 + 2 + 64 + 4 + 4 + allot
@@ -152,7 +152,9 @@ hex
 002 constant O_RDWR
 decimal
 
-string dict-new constant atemp$
+\ string dict-new constant atemp$
+15 allocate constant buffer$
+buffer$ 15 0 fill
 
 : serial_getoptions ( handle -- | read serial port options into termios )
 	TCGETS termios ioctl drop ;
@@ -171,11 +173,20 @@ string dict-new constant atemp$
 	dup
 	0 >=
 	if
-    atemp$ s>$
-		s" /dev/ttyS" atemp$ !<+$
-    atemp$ null+>$
-    atemp$ @$ drop
-		O_RDWR O_NOCTTY  O_NDELAY or or
+    \atemp$ s>$
+    case
+      com1 of s\" /dev/ttyS0\x00" endof
+      com2 of s\" /dev/ttyS1\x00" endof
+      com3 of s\" /dev/ttyS2\x00" endof
+      com4 of s\" /dev/ttyS3\x00" endof
+      s\"  \x00" endof
+    endcase
+    buffer$ swap cmove
+    \ s" /dev/ttyS" atemp$ !<+$
+    \ atemp$ null+>$
+    \ atemp$ @$ drop
+    buffer$
+    O_RDWR O_NOCTTY  O_NDELAY or or
 		open
 		dup
 		dup
