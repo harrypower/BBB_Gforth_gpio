@@ -64,7 +64,7 @@
 
 require serial.fs
 require ./Gforth-Objects/objects.fs
-require ./BBB_Gforth_gpio/BBB_GPIO_lib.fs
+require BBB_GPIO_lib.fs
 
 [ifundef] destruction
   interface
