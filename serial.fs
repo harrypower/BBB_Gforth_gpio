@@ -31,7 +31,7 @@
 \       9-17-2004  ported from kForth  KM
 \ 11-06-2018 Philip K. Smith removed strings.fs and added stringobj.fs dependancy
 \            also added gpl3 license
-\ 24-06-2018 Philip K. Smith removed use of stringobj.fs dependancy 
+\ 24-06-2018 Philip K. Smith removed use of stringobj.fs dependancy
 \ termios structure
 
 \ require ./Gforth-Objects/stringobj.fs
@@ -154,7 +154,7 @@ hex
 decimal
 
 \ string dict-new constant atemp$
-15 allocate constant buffer$
+15 allocate throw constant buffer$
 buffer$ 15 0 fill
 
 : serial_getoptions ( handle -- | read serial port options into termios )
