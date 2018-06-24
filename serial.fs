@@ -177,7 +177,7 @@ buffer$ 15 0 fill
       com2 of s\" /dev/ttyS1\x00" endof
       com3 of s\" /dev/ttyS2\x00" endof
       com4 of s\" /dev/ttyS3\x00" endof
-      s\"  \x00" endof
+      s\"  \x00" 
     endcase
     buffer$ swap cmove
     buffer$
