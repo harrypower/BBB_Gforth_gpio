@@ -34,7 +34,6 @@
 \ 24-06-2018 Philip K. Smith removed use of stringobj.fs dependancy
 \ termios structure
 
-\ require ./Gforth-Objects/stringobj.fs
 require syscalls386.fs
 
 create termios 4 4 + 4 + 4 + 2 + 64 + 4 + 4 + allot
@@ -153,7 +152,6 @@ hex
 002 constant O_RDWR
 decimal
 
-\ string dict-new constant atemp$
 15 allocate throw constant buffer$
 buffer$ 15 0 fill
 
@@ -174,7 +172,6 @@ buffer$ 15 0 fill
 	dup
 	0 >=
 	if
-    \atemp$ s>$
     case
       com1 of s\" /dev/ttyS0\x00" endof
       com2 of s\" /dev/ttyS1\x00" endof
@@ -183,9 +180,6 @@ buffer$ 15 0 fill
       s\"  \x00" endof
     endcase
     buffer$ swap cmove
-    \ s" /dev/ttyS" atemp$ !<+$
-    \ atemp$ null+>$
-    \ atemp$ @$ drop
     buffer$
     O_RDWR O_NOCTTY  O_NDELAY or or
 		open
