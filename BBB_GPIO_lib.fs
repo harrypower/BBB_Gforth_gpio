@@ -97,9 +97,14 @@ c-library myBBBGPIO
 
 \c int gpiocleanup(void) {
 \c int errors = gpio_setup;
+\c int closeerror = IOGOOD;
 \c if(gpio_setup == IOGOOD){
-\c munmap((void *)gpio_map,GPIO_SIZE);
-\c errors = close(mem_fd);
+\c errors = munmap((void *)gpio_map,GPIO_SIZE);
+\c if ( errors != IOGOOD ) {
+\c    fprintf(stderr,"munmap error: %d more: %s\n",errors,strerror(errno)); }
+\c closeerror = close(mem_fd);
+\c if ( closeerror != IOGOOD) {
+\c    fprintf(stderr,"close mem_fd handle error: %d more: %s\n",closeerror,strerror(errno)); }
 \c mem_fd = 0;
 \c gpio_map = 0;
 \c areg = 0;
