@@ -98,6 +98,7 @@ c-library myBBBGPIO
 \c int gpiocleanup(void) {
 \c int errors = gpio_setup;
 \c if(gpio_setup == IOGOOD){
+\c munmap(gpio_map,GPIO_SIZE);
 \c errors = close(mem_fd);
 \c mem_fd = 0;
 \c gpio_map = 0;
